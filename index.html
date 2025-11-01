@@ -504,18 +504,18 @@
     <div class="tech-suggestions">
       <h3>🔥 Tech em Alta 2025</h3>
       <div class="suggestions-grid">
-        <div class="suggestion-chip" onclick="buscarSugestao('iPhone 15')">📱 iPhone 15</div>
-        <div class="suggestion-chip" onclick="buscarSugestao('Smart TV 4K')">📺 Smart TV</div>
-        <div class="suggestion-chip" onclick="buscarSugestao('Notebook Gamer')">💻 Notebook</div>
+        <div class="suggestion-chip" onclick="buscarSugestao('iPhone')">📱 iPhone</div>
+        <div class="suggestion-chip" onclick="buscarSugestao('Smart TV')">📺 Smart TV</div>
+        <div class="suggestion-chip" onclick="buscarSugestao('Notebook')">💻 Notebook</div>
         <div class="suggestion-chip" onclick="buscarSugestao('Fone Bluetooth')">🎧 Fones</div>
-        <div class="suggestion-chip" onclick="buscarSugestao('Samsung Galaxy')">📱 Galaxy</div>
+        <div class="suggestion-chip" onclick="buscarSugestao('Samsung')">📱 Samsung</div>
         <div class="suggestion-chip" onclick="buscarSugestao('Smartwatch')">⌚ Smartwatch</div>
-        <div class="suggestion-chip" onclick="buscarSugestao('Alexa Echo')">🔊 Alexa</div>
+        <div class="suggestion-chip" onclick="buscarSugestao('Alexa')">🔊 Alexa</div>
         <div class="suggestion-chip" onclick="buscarSugestao('Mouse Gamer')">🖱️ Mouse</div>
-        <div class="suggestion-chip" onclick="buscarSugestao('Teclado Mecânico')">⌨️ Teclado</div>
-        <div class="suggestion-chip" onclick="buscarSugestao('Câmera WiFi')">📷 Câmera</div>
-        <div class="suggestion-chip" onclick="buscarSugestao('SSD 1TB')">💾 SSD</div>
-        <div class="suggestion-chip" onclick="buscarSugestao('Webcam HD')">🎥 Webcam</div>
+        <div class="suggestion-chip" onclick="buscarSugestao('Teclado')">⌨️ Teclado</div>
+        <div class="suggestion-chip" onclick="buscarSugestao('Camera')">📷 Câmera</div>
+        <div class="suggestion-chip" onclick="buscarSugestao('SSD')">💾 SSD</div>
+        <div class="suggestion-chip" onclick="buscarSugestao('Webcam')">🎥 Webcam</div>
       </div>
     </div>
 
@@ -548,13 +548,6 @@
       const query = document.getElementById('busca').value.trim();
       const resultadosDiv = document.getElementById('resultados');
       
-      resultadosDiv.innerHTML = `
-        <div class="loading">
-          <div class="cyber-spinner"></div>
-          <p>Escaneando base de dados...</p>
-        </div>
-      `;
-
       if (!query) {
         resultadosDiv.innerHTML = `
           <div class="empty-state">
@@ -566,9 +559,24 @@
         return;
       }
 
+      resultadosDiv.innerHTML = `
+        <div class="loading">
+          <div class="cyber-spinner"></div>
+          <p>Escaneando base de dados...</p>
+        </div>
+      `;
+
       try {
-        const res = await fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=20`);
+        const res = await fetch(`https://corsproxy.io/?${encodeURIComponent('https://api.mercadolibre.com/sites/MLB/search?q=' + query + '&limit=20')}`);
+        
+        if (!res.ok) {
+          throw new Error('Erro na requisição: ' + res.status);
+        }
+        
         const data = await res.json();
+        
+        console.log('Resposta da API:', data);
+        
         resultadosDiv.innerHTML = "";
 
         if (!data.results || data.results.length === 0) {
@@ -588,8 +596,8 @@
           card.style.animation = `fadeIn 0.5s ease-out ${index * 0.05}s backwards`;
 
           const img = document.createElement('img');
-          img.src = produto.thumbnail.replace('http:', 'https:');
-          img.alt = produto.title;
+          img.src = produto.thumbnail ? produto.thumbnail.replace('http:', 'https:') : 'https://via.placeholder.com/300x300?text=Sem+Imagem';
+          img.alt = produto.title || 'Produto';
           img.loading = 'lazy';
 
           const cardContent = document.createElement('div');
@@ -599,13 +607,17 @@
           link.href = produto.permalink + AFFILIATE_CODE;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.textContent = produto.title;
+          link.textContent = produto.title || 'Produto sem título';
 
           const preco = document.createElement('p');
-          preco.textContent = produto.price.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-          });
+          if (produto.price) {
+            preco.textContent = produto.price.toLocaleString('pt-BR', {
+              style: 'currency',
+              currency: 'BRL'
+            });
+          } else {
+            preco.textContent = 'Consultar preço';
+          }
 
           cardContent.appendChild(link);
           cardContent.appendChild(preco);
@@ -617,12 +629,13 @@
         });
 
       } catch (err) {
-        console.error(err);
+        console.error('Erro completo:', err);
         resultadosDiv.innerHTML = `
           <div class="empty-state">
             <div class="empty-state-icon">⚠️</div>
             <h3>Erro de Conexão</h3>
             <p>Falha ao acessar o servidor. Tente novamente.</p>
+            <p style="font-size: 14px; margin-top: 10px; opacity: 0.7;">Detalhes: ${err.message}</p>
           </div>
         `;
       }
