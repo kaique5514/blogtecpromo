@@ -567,7 +567,8 @@
       `;
 
       try {
-        const res = await fetch(`https://corsproxy.io/?${encodeURIComponent('https://api.mercadolibre.com/sites/MLB/search?q=' + query + '&limit=20')}`);
+        const res = await fetch(`api.php?q=${query}`);
+
         
         if (!res.ok) {
           throw new Error('Erro na requisição: ' + res.status);
