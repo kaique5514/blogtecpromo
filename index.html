@@ -567,16 +567,15 @@
       `;
 
       try {
-        const res = await fetch(`api.php?q=${query}`);
+        // Caminho do api.php local
+        const res = await fetch('api.php?q=' + encodeURIComponent(query));
 
-        
+
         if (!res.ok) {
           throw new Error('Erro na requisição: ' + res.status);
         }
         
         const data = await res.json();
-        
-        console.log('Resposta da API:', data);
         
         resultadosDiv.innerHTML = "";
 
@@ -605,7 +604,7 @@
           cardContent.className = 'card-content';
 
           const link = document.createElement('a');
-          link.href = produto.permalink + AFFILIATE_CODE;
+          link.href = produto.permalink;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
           link.textContent = produto.title || 'Produto sem título';
@@ -630,7 +629,6 @@
         });
 
       } catch (err) {
-        console.error('Erro completo:', err);
         resultadosDiv.innerHTML = `
           <div class="empty-state">
             <div class="empty-state-icon">⚠️</div>
@@ -647,15 +645,6 @@
         buscar();
       }
     });
-
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-    `;
-    document.head.appendChild(style);
   </script>
 </body>
 </html>
